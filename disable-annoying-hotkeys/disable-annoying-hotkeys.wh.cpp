@@ -46,8 +46,8 @@ the behavior, disable the relevant setting or disable the mod.
 // ==/WindhawkModSettings==
 
 struct {
-    bool disableFeedbackHubHotkey;
-    bool disableOfficeHotkeys;
+  bool disableFeedbackHubHotkey;
+  bool disableOfficeHotkeys;
 } settings;
 
 BOOL(WINAPI* pOriginalRegisterHotKey)(HWND hWnd, int id, UINT fsModifiers, UINT vk);
@@ -57,75 +57,57 @@ constexpr UINT kOfficeModifiers = MOD_ALT | MOD_CONTROL | MOD_SHIFT | MOD_WIN | 
 
 // Office 키 목록은 Windows가 예약 등록하는 조합만 차단하기 위해 한곳에 모읍니다.
 constexpr UINT kOfficeHotkeys[] = {
-    'D',
-    'L',
-    'N',
-    'O',
-    'P',
-    'T',
-    'W',
-    'X',
-    'Y',
-    VK_SPACE,
+  'D', 'L', 'N', 'O', 'P', 'T', 'W', 'X', 'Y', VK_SPACE,
 };
 
-void LoadSettings()
-{
-    settings.disableFeedbackHubHotkey = Wh_GetIntSetting(L"disableFeedbackHubHotkey");
-    settings.disableOfficeHotkeys = Wh_GetIntSetting(L"disableOfficeHotkeys");
+void LoadSettings() {
+  settings.disableFeedbackHubHotkey = Wh_GetIntSetting(L"disableFeedbackHubHotkey");
+  settings.disableOfficeHotkeys = Wh_GetIntSetting(L"disableOfficeHotkeys");
 }
 
-bool IsOfficeHotkey(UINT vk)
-{
-    if (!vk) { return true; }
-    for (UINT officeHotkey : kOfficeHotkeys) {
-        if (vk == officeHotkey) { return true; }
-    }
-    return false;
+bool IsOfficeHotkey(UINT vk) {
+  if (!vk) return true;
+  for (UINT officeHotkey : kOfficeHotkeys) {
+    if (vk == officeHotkey) return true;
+  }
+  return false;
 }
 
-bool ShouldBlockHotkey(UINT fsModifiers, UINT vk)
-{
-    if (settings.disableFeedbackHubHotkey && fsModifiers == kFeedbackHubModifiers && vk == 'F') {
-        return true;
-    }
-    return settings.disableOfficeHotkeys && fsModifiers == kOfficeModifiers && IsOfficeHotkey(vk);
+bool ShouldBlockHotkey(UINT fsModifiers, UINT vk) {
+  if (settings.disableFeedbackHubHotkey && fsModifiers == kFeedbackHubModifiers && vk == 'F') return true;
+  return settings.disableOfficeHotkeys && fsModifiers == kOfficeModifiers && IsOfficeHotkey(vk);
 }
 
-BOOL WINAPI RegisterHotKeyHook(HWND hWnd, int id, UINT fsModifiers, UINT vk)
-{
-    if (ShouldBlockHotkey(fsModifiers, vk)) {
-        SetLastError(ERROR_HOTKEY_ALREADY_REGISTERED);
-        return FALSE;
-    }
-    return pOriginalRegisterHotKey(hWnd, id, fsModifiers, vk);
+BOOL WINAPI RegisterHotKeyHook(HWND hWnd, int id, UINT fsModifiers, UINT vk) {
+  if (ShouldBlockHotkey(fsModifiers, vk)) {
+    SetLastError(ERROR_HOTKEY_ALREADY_REGISTERED);
+    return FALSE;
+  }
+  return pOriginalRegisterHotKey(hWnd, id, fsModifiers, vk);
 }
 
-BOOL Wh_ModInit()
-{
-    LoadSettings();
+BOOL Wh_ModInit() {
+  LoadSettings();
 
-    HMODULE user32Module = GetModuleHandle(L"user32.dll");
-    if (!user32Module) {
-        Wh_Log(L"GetModuleHandle(user32.dll) failed: %lu", GetLastError());
-        return FALSE;
-    }
+  HMODULE user32Module = GetModuleHandle(L"user32.dll");
+  if (!user32Module) {
+    Wh_Log(L"GetModuleHandle(user32.dll) failed: %lu", GetLastError());
+    return FALSE;
+  }
 
-    void* originalRegisterHotKey = reinterpret_cast<void*>(GetProcAddress(user32Module, "RegisterHotKey"));
-    if (!originalRegisterHotKey) {
-        Wh_Log(L"GetProcAddress(RegisterHotKey) failed: %lu", GetLastError());
-        return FALSE;
-    }
+  void* originalRegisterHotKey = reinterpret_cast<void*>(GetProcAddress(user32Module, "RegisterHotKey"));
+  if (!originalRegisterHotKey) {
+    Wh_Log(L"GetProcAddress(RegisterHotKey) failed: %lu", GetLastError());
+    return FALSE;
+  }
 
-    if (!Wh_SetFunctionHook(originalRegisterHotKey, reinterpret_cast<void*>(RegisterHotKeyHook), reinterpret_cast<void**>(&pOriginalRegisterHotKey))) {
-        Wh_Log(L"Wh_SetFunctionHook(RegisterHotKey) failed");
-        return FALSE;
-    }
+  if (!Wh_SetFunctionHook(originalRegisterHotKey, reinterpret_cast<void*>(RegisterHotKeyHook),
+                          reinterpret_cast<void**>(&pOriginalRegisterHotKey))) {
+    Wh_Log(L"Wh_SetFunctionHook(RegisterHotKey) failed");
+    return FALSE;
+  }
 
-    return TRUE;
+  return TRUE;
 }
 
-void Wh_ModSettingsChanged()
-{
-    LoadSettings();
-}
+void Wh_ModSettingsChanged() { LoadSettings(); }

@@ -1,0 +1,5 @@
+BasedOnStyle: Google
+ColumnLimit: 120
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+IndentWidth: 2
