@@ -2,7 +2,7 @@
 // @id              disable-annoying-hotkeys
 // @name            Disable Annoying Hotkeys
 // @description     Disables selected Windows hotkeys such as Win+F and Office hotkeys
-// @version         0.1.0
+// @version         0.2.0
 // @author          TetraTheta
 // @github          https://github.com/TetraTheta
 // @include         explorer.exe
@@ -13,8 +13,7 @@
 /*
 # Disable Annoying Hotkeys
 
-This mod disables selected Windows hotkeys that are commonly registered by
-Explorer:
+This mod disables selected Windows hotkeys that are commonly registered by Explorer:
 
 - Feedback Hub: `Win+F`
 - Office:
@@ -28,9 +27,9 @@ Explorer:
   - `Ctrl+Shift+Alt+Win+X`
   - `Ctrl+Shift+Alt+Win+Y`
   - `Ctrl+Shift+Alt+Win+Space`
+- Voice Access: `Ctrl+Win+S`
 
-Both groups can be enabled or disabled separately in the mod settings. To undo
-the behavior, disable the relevant setting or disable the mod.
+Both groups can be enabled or disabled separately in the mod settings. To undo the behavior, disable the relevant setting or disable the mod.
 */
 // ==/WindhawkModReadme==
 
@@ -42,27 +41,29 @@ the behavior, disable the relevant setting or disable the mod.
 - disableOfficeHotkeys: true
   $name: Disable Office hotkeys
   $description: Blocks Explorer from registering Ctrl+Shift+Alt+Win Office hotkeys.
+- disableVoiceAccessHotkey: true
+  $name: Disable Voice Access hotkey
+  $description: Blocks Explorer from registering Ctrl+Win+S.
 */
 // ==/WindhawkModSettings==
 
 struct {
   bool disableFeedbackHubHotkey;
   bool disableOfficeHotkeys;
+  bool disableVoiceAccessHotkey;
 } settings;
 
 BOOL(WINAPI* pOriginalRegisterHotKey)(HWND hWnd, int id, UINT fsModifiers, UINT vk);
 
 constexpr UINT kFeedbackHubModifiers = MOD_WIN | MOD_NOREPEAT;
 constexpr UINT kOfficeModifiers = MOD_ALT | MOD_CONTROL | MOD_SHIFT | MOD_WIN | MOD_NOREPEAT;
-
-// Office 키 목록은 Windows가 예약 등록하는 조합만 차단하기 위해 한곳에 모읍니다.
-constexpr UINT kOfficeHotkeys[] = {
-  'D', 'L', 'N', 'O', 'P', 'T', 'W', 'X', 'Y', VK_SPACE,
-};
+constexpr UINT kVoiceAccessModifiers = MOD_CONTROL | MOD_WIN | MOD_NOREPEAT;
+constexpr UINT kOfficeHotkeys[] = {'D', 'L', 'N', 'O', 'P', 'T', 'W', 'X', 'Y', VK_SPACE};
 
 void LoadSettings() {
   settings.disableFeedbackHubHotkey = Wh_GetIntSetting(L"disableFeedbackHubHotkey");
   settings.disableOfficeHotkeys = Wh_GetIntSetting(L"disableOfficeHotkeys");
+  settings.disableVoiceAccessHotkey = Wh_GetIntSetting(L"disableVoiceAccessHotkey");
 }
 
 bool IsOfficeHotkey(UINT vk) {
@@ -75,7 +76,9 @@ bool IsOfficeHotkey(UINT vk) {
 
 bool ShouldBlockHotkey(UINT fsModifiers, UINT vk) {
   if (settings.disableFeedbackHubHotkey && fsModifiers == kFeedbackHubModifiers && vk == 'F') return true;
-  return settings.disableOfficeHotkeys && fsModifiers == kOfficeModifiers && IsOfficeHotkey(vk);
+  if (settings.disableOfficeHotkeys && fsModifiers == kOfficeModifiers && IsOfficeHotkey(vk)) return true;
+  if (settings.disableVoiceAccessHotkey && fsModifiers == kVoiceAccessModifiers && vk == 'S') return true;
+  return false;
 }
 
 BOOL WINAPI RegisterHotKeyHook(HWND hWnd, int id, UINT fsModifiers, UINT vk) {
@@ -101,8 +104,7 @@ BOOL Wh_ModInit() {
     return FALSE;
   }
 
-  if (!Wh_SetFunctionHook(originalRegisterHotKey, reinterpret_cast<void*>(RegisterHotKeyHook),
-                          reinterpret_cast<void**>(&pOriginalRegisterHotKey))) {
+  if (!Wh_SetFunctionHook(originalRegisterHotKey, reinterpret_cast<void*>(RegisterHotKeyHook), reinterpret_cast<void**>(&pOriginalRegisterHotKey))) {
     Wh_Log(L"Wh_SetFunctionHook(RegisterHotKey) failed");
     return FALSE;
   }
