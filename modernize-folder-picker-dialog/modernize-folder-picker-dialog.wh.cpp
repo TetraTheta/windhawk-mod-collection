@@ -9,15 +9,13 @@
 // @compilerOptions -lole32 -loleaut32 -lshell32
 // @license         MIT
 // ==/WindhawkMod==
-
 // ==WindhawkModReadme==
 /*
 # Modernize Folder Picker Dialog
 
 Replaces compatible "Browse For Folder" dialogs with the modern folder picker.
-Callback-based installers such as NSIS keep their initial selection and install
-path validation. Calls with unsupported options or a restricted folder tree use
-the original Windows dialog.
+Callback-based installers such as NSIS keep their initial selection and install path validation.
+Calls with unsupported options or a restricted folder tree use the original Windows dialog.
 */
 // ==/WindhawkModReadme==
 
@@ -50,9 +48,8 @@ LRESULT CALLBACK CallbackWindowProc(HWND window, UINT message, WPARAM wParam, LP
 
   if (message == BFFM_SETSELECTIONW) {
     winrt::com_ptr<IShellItem> folder;
-    HRESULT hr = wParam
-                   ? SHCreateItemFromParsingName(reinterpret_cast<PCWSTR>(lParam), nullptr, IID_PPV_ARGS(folder.put()))
-                   : SHCreateItemFromIDList(reinterpret_cast<PCIDLIST_ABSOLUTE>(lParam), IID_PPV_ARGS(folder.put()));
+    HRESULT hr = wParam ? SHCreateItemFromParsingName(reinterpret_cast<PCWSTR>(lParam), nullptr, IID_PPV_ARGS(folder.put()))
+                        : SHCreateItemFromIDList(reinterpret_cast<PCIDLIST_ABSOLUTE>(lParam), IID_PPV_ARGS(folder.put()));
     if (SUCCEEDED(hr)) bridge->dialog->SetFolder(folder.get());
     return 0;
   }
@@ -82,8 +79,7 @@ struct DialogEvents : winrt::implements<DialogEvents, IFileDialogEvents> {
     if (FAILED(SHGetIDListFromObject(selected.get(), &pidl))) return S_FALSE;
 
     bridge->allowSelection = true;
-    bridge->browseInfo->lpfn(bridge->window, BFFM_SELCHANGED, reinterpret_cast<LPARAM>(pidl),
-                             bridge->browseInfo->lParam);
+    bridge->browseInfo->lpfn(bridge->window, BFFM_SELCHANGED, reinterpret_cast<LPARAM>(pidl), bridge->browseInfo->lParam);
     CoTaskMemFree(pidl);
     return bridge->allowSelection || bridge->unsupported ? S_OK : S_FALSE;
   }
@@ -91,8 +87,7 @@ struct DialogEvents : winrt::implements<DialogEvents, IFileDialogEvents> {
   HRESULT STDMETHODCALLTYPE OnFolderChanging(IFileDialog*, IShellItem*) override { return S_OK; }
   HRESULT STDMETHODCALLTYPE OnFolderChange(IFileDialog*) override { return S_OK; }
   HRESULT STDMETHODCALLTYPE OnSelectionChange(IFileDialog*) override { return S_OK; }
-  HRESULT STDMETHODCALLTYPE OnShareViolation(IFileDialog*, IShellItem*,
-                                             FDE_SHAREVIOLATION_RESPONSE* response) override {
+  HRESULT STDMETHODCALLTYPE OnShareViolation(IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE* response) override {
     *response = FDESVR_DEFAULT;
     return S_OK;
   }
@@ -126,14 +121,12 @@ PIDLIST_ABSOLUTE WINAPI SHBrowseForFolderW_hook(LPBROWSEINFOW lpbi) {
   CallbackBridge bridge = {lpbi, dialog.get()};
   DWORD cookie = 0;
   if (lpbi->lpfn) {
-    bridge.window =
-      CreateWindowExW(0, L"STATIC", nullptr, 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandleW(nullptr), nullptr);
+    bridge.window = CreateWindowExW(0, L"STATIC", nullptr, 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!bridge.window) return SHBrowseForFolderW_orig(lpbi);
 
     SetWindowLongPtrW(bridge.window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&bridge));
     SetLastError(0);
-    bridge.previousProc = reinterpret_cast<WNDPROC>(
-      SetWindowLongPtrW(bridge.window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(CallbackWindowProc)));
+    bridge.previousProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(bridge.window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(CallbackWindowProc)));
     if (!bridge.previousProc && GetLastError() != 0) {
       DestroyWindow(bridge.window);
       return SHBrowseForFolderW_orig(lpbi);
@@ -176,8 +169,7 @@ PIDLIST_ABSOLUTE WINAPI SHBrowseForFolderW_hook(LPBROWSEINFOW lpbi) {
   }
 
   SHFILEINFOW fileInfo = {};
-  if (SHGetFileInfoW(reinterpret_cast<PCWSTR>(result), 0, &fileInfo, sizeof(fileInfo),
-                     SHGFI_PIDL | SHGFI_SYSICONINDEX)) {
+  if (SHGetFileInfoW(reinterpret_cast<PCWSTR>(result), 0, &fileInfo, sizeof(fileInfo), SHGFI_PIDL | SHGFI_SYSICONINDEX)) {
     lpbi->iImage = fileInfo.iIcon;
   }
 

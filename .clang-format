@@ -1,5 +1,6 @@
 BasedOnStyle: Google
-ColumnLimit: 120
+ColumnLimit: 150
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2
 IndentWidth: 2
+ReflowComments: IndentOnly

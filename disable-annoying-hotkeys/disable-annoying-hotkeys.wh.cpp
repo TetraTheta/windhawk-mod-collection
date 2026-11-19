@@ -8,7 +8,6 @@
 // @include         explorer.exe
 // @license         MIT
 // ==/WindhawkMod==
-
 // ==WindhawkModReadme==
 /*
 # Disable Annoying Hotkeys
@@ -32,7 +31,6 @@ This mod disables selected Windows hotkeys that are commonly registered by Explo
 Both groups can be enabled or disabled separately in the mod settings. To undo the behavior, disable the relevant setting or disable the mod.
 */
 // ==/WindhawkModReadme==
-
 // ==WindhawkModSettings==
 /*
 - disableFeedbackHubHotkey: true

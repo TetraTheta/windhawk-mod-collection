@@ -9,58 +9,45 @@
 // @compilerOptions -lole32 -lshlwapi -lpropsys -lshell32 -lcomctl32
 // @license         MIT
 // ==/WindhawkMod==
-
-// ==WindhawkModSettings==
-/*
-- delay: 400
-  $name: Refresh Delay (ms)
-  $description: "How long to wait after a refresh before fitting columns to
-content. Increase if columns fit before all files are loaded (e.g. large
-folders). Decrease for a snappier response. Default: 400ms."
-- minFirstColWidth: 150
-  $name: Minimum First Column Width (px)
-  $description: "The minimum width in pixels for the first column
-(usually 'Name'). If the auto-fitted width is smaller than this value, it will
-be forced to this minimum.Default: 150px."
-*/
-// ==/WindhawkModSettings==
-
 // ==WindhawkModReadme==
 /*
 # File Explorer Details Auto-Fit Columns
 
-Automatically fits all visible column widths to their content whenever a folder
-is opened or refreshed in `Details view`, eliminating truncated text and
-ellipsis (`...`).
+Automatically fits all visible column widths to their content whenever a folder is opened or refreshed in `Details view`, eliminating truncated text and ellipsis (`...`).
 
-![File Explorer Details Auto-Fit
-Columns](https://raw.githubusercontent.com/armaninyow/Remove-Context-Menu-Items/refs/heads/main/FEDAFC.gif)
+![File Explorer Details Auto-Fit Columns](https://raw.githubusercontent.com/armaninyow/Remove-Context-Menu-Items/refs/heads/main/FEDAFC.gif)
 
 ## Triggers
 
 - Opening or navigating to a folder
 - Minimizing and restoring the Explorer window
-- `Ctrl + R`
-- `F5`
+- `Ctrl + R` or `F5`
 - Right-click context menu → Refresh
 - The refresh button in the toolbar
 
-Only affects `Details view`. Other view modes (Icons, Tiles, List, etc.) are
-untouched.
+Only affects `Details view`. Other view modes (Icons, Tiles, List, etc.) are untouched.
 
 ## Settings
 
-`Refresh Delay (ms)`: How long the mod waits before auto-fitting columns. The
-default is 400ms, which gives Explorer enough time to finish loading files
-before measuring content width. If you notice columns fitting too early in large
-folders, increase this value. If you want a snappier response in small folders,
-decrease it.
+**`Refresh Delay (ms)`**: How long the mod waits before auto-fitting columns.
+The default is 400ms, which gives Explorer enough time to finish loading files before measuring content width.
+If you notice columns fitting too early in large folders, increase this value.
+If you want a snappier response in small folders, decrease it.
 
-`Minimum First Column Width (px)`: Sets a floor value for the width of the first
-column (typically the file Name). Prevents the column from becoming too narrow
-when a folder only contains items with very short names.
+**`Minimum First Column Width (px)`**: Sets a floor value for the width of the first column (typically the file Name).
+Prevents the column from becoming too narrow when a folder only contains items with very short names.
 */
 // ==/WindhawkModReadme==
+// ==WindhawkModSettings==
+/*
+- delay: 400
+  $name: Refresh Delay (ms)
+  $description: "How long to wait after a refresh before fitting columns to content. Increase if columns fit before all files are loaded (e.g. large folders). Decrease for a snappier response. Default: 400ms."
+- minFirstColWidth: 150
+  $name: Minimum First Column Width (px)
+  $description: "The minimum width in pixels for the first column (usually 'Name'). If the auto-fitted width is smaller than this value, it will be forced to this minimum.Default: 150px."
+*/
+// ==/WindhawkModSettings==
 
 #include <exdisp.h>
 #include <initguid.h>

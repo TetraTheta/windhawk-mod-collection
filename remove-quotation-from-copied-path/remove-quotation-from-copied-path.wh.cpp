@@ -8,14 +8,12 @@
 // @include         explorer.exe
 // @license         MIT
 // ==/WindhawkMod==
-
 // ==WindhawkModReadme==
 /*
 # Remove Quotation from Copied Path
 
-Explorer's **Copy as path** command copies paths without surrounding double
-quotes. This also applies to `Ctrl+Shift+C` and removes the quotes from each
-path when multiple files or folders are selected.
+Explorer's **Copy as path** command copies paths without surrounding double quotes.
+This also applies to `Ctrl+Shift+C` and removes the quotes from each path when multiple files or folders are selected.
 */
 // ==/WindhawkModReadme==
 
@@ -38,9 +36,7 @@ BOOL Wh_ModInit() {
   }
 
   const WindhawkUtils::SYMBOL_HOOK hooks[] = {
-    {{L"GetShellItemsAsTextHGLOBAL", L"_GetShellItemsAsTextHGLOBAL@12"},
-     &GetShellItemsAsTextHGLOBAL_orig,
-     GetShellItemsAsTextHGLOBAL_hook},
+    {{L"GetShellItemsAsTextHGLOBAL", L"_GetShellItemsAsTextHGLOBAL@12"}, &GetShellItemsAsTextHGLOBAL_orig, GetShellItemsAsTextHGLOBAL_hook},
   };
 
   if (!WindhawkUtils::HookSymbols(shell32, hooks, ARRAYSIZE(hooks))) {
